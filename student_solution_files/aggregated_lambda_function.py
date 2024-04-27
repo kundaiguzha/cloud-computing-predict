@@ -78,7 +78,7 @@ def key_phrase_finder(list_of_important_phrases, list_of_extracted_phrases):
  def email_response(name, critical_phrase_list, list_of_extracted_phrases, AWS_Comprehend_Sentiment_Dump):
 
     # Function Constants
-    SENDER_NAME = 'Place your name here'
+    SENDER_NAME = 'Kundai Guzha'
     
     # --- Check for the sentiment of the message and find dominant sentiment score ---
     Sentiment_finder = find_max_sentiment(AWS_Comprehend_Sentiment_Dump)
@@ -237,14 +237,14 @@ def lambda_handler(event, context):
     # Complete the below code so that the appropriate 
     # incoming data is sent to the matching column in your DynamoDB table
     # --- Insert your code here ---
+    
+    # Do not change the name of this variable
     db_response = table.put_item(Item={'ResponsesID': rid, # <--- Insert the correct variable
                         'Name': dec_dict['name'],  # <--- Insert the correct variable
                         'Email': dec_dict['email'], # <--- Insert the correct variable
                         'Cell': dec_dict['phone'], # <--- Insert the correct variable
                         'Message': dect_dict['message'] # <--- Insert the correct variable
                                       })
-    # Do not change the name of this variable
-    db_response = None
     # -----------------------------
     
 
@@ -252,15 +252,15 @@ def lambda_handler(event, context):
     comprehend = boto3.client(service_name='comprehend')
     
     # --- Insert your code here ---
-    enquiry_text = None # <--- Insert code to place the website message into this variable
+    enquiry_text = dect_dict['message'] # <--- Insert code to place the website message into this variable
     # -----------------------------
     
     # --- Insert your code here ---
-    sentiment = None # <---Insert code to get the sentiment with AWS comprehend
+    sentiment = find_max_sentiment(Comprehend_Sentiment_Output) # <---Insert code to get the sentiment with AWS comprehend
     # -----------------------------
     
     # --- Insert your code here ---
-    key_phrases = None # <--- Insert code to get the key phrases with AWS comprehend
+    key_phrases = key_phrase_finder(list_of_important_phrases, list_of_extracted_phrases) # <--- Insert code to get the key phrases with AWS comprehend
     # -----------------------------
     
     # Get list of phrases in numpy array
@@ -273,7 +273,7 @@ def lambda_handler(event, context):
     # <<< Ensure that the response text is stored in the variable `email_text` >>> 
     # --- Insert your code here ---
     # Do not change the name of this variable
-    email_text = None 
+    email_text = email_response(name, critical_phrase_list, list_of_extracted_phrases, AWS_Comprehend_Sentiment_Dump)
 
     
     # -----------------------------
@@ -285,9 +285,64 @@ def lambda_handler(event, context):
     # `email_text` variable as it's body.
     # <<< Ensure that the SES service response is stored in the variable `ses_response` >>> 
     # --- Insert your code here ---
+    SENDER = dec_dict['email']
+    # -----------------------------
 
+    # Replace recipient@example.com with a "To" address. If your account 
+    # is still in the sandbox, this address must be verified.
+    # --- Insert your code here ---
+    RECIPIENT ='edsa.predicts@explore-ai.net' 
+    # -----------------------------
+
+
+    # The subject line for the email.
+    # --- DO NOT MODIFY THIS CODE ---
+    SUBJECT = f"Data Science Portfolio Project Website - Hello {dec_dict['name']}"
+    # -------------------------------
+
+    # The email body for recipients with non-HTML email clients
+    BODY_TEXT = (email_text)
+
+    # The character encoding for the email.
+    CHARSET = "UTF-8"
+
+    # Create a new SES service resource
+    client = boto3.client('ses')
+
+    # Try to send the email.
+    try:
+        #Provide the contents of the email.
     # Do not change the name of this variable
-    ses_response = None
+    ses_response = client.send_email(
+            Destination={
+                'guzhakundai@gmail.com': [
+                    RECIPIENT,
+                    # 'edsa.predicts@explore-ai.net', # <--- Uncomment this line once you have successfully tested your predict end-to-end
+                ],
+            },
+            Message={
+                'Body': {
+
+                    'Text': {
+                        'Charset': CHARSET,
+                        'Data': BODY_TEXT,
+                    },
+                },
+                'Subject': {
+                    'Charset': CHARSET,
+                    'Data': SUBJECT,
+                },
+            },
+            Source=SENDER,
+        )
+
+    # Display an error if something goes wrong.	
+    except ClientError as e:
+        print(e.response['Error']['Message'])
+    else:
+        print("Email sent! Message ID:"),
+        print(ses_response['MessageId'])
+
     
     # ...
 
