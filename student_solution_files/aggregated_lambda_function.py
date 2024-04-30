@@ -243,7 +243,7 @@ def lambda_handler(event, context):
                         'Name': dec_dict['name'],  # <--- Insert the correct variable
                         'Email': dec_dict['email'], # <--- Insert the correct variable
                         'Cell': dec_dict['phone'], # <--- Insert the correct variable
-                        'Message': dect_dict['message'] # <--- Insert the correct variable
+                        'Message': dec_dict['message'] # <--- Insert the correct variable
                                       })
     # -----------------------------
     
@@ -252,7 +252,7 @@ def lambda_handler(event, context):
     comprehend = boto3.client(service_name='comprehend')
     
     # --- Insert your code here ---
-    enquiry_text = dect_dict['message'] # <--- Insert code to place the website message into this variable
+    enquiry_text = dec_dict['message'] # <--- Insert code to place the website message into this variable
     # -----------------------------
     
     # --- Insert your code here ---
